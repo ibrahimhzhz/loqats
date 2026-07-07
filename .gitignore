@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.docker.example
+vertex-key.json
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs and reports
+*.log
+coverage/
+htmlcov/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# Runtime temp files
+tmp/ats_resumes/
+/tmp/ats_resumes/
+
+# --- Secrets & local data: NEVER commit these ---
+.env
+.env.*
+!.env.example
+vertex-key.json
+*service-account*.json
+*.db
+ats.db
+.venv/
+__pycache__/
+*.pyc

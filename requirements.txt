@@ -1,0 +1,21 @@
+fastapi==0.115.12
+starlette==0.46.2
+uvicorn==0.34.0
+jinja2
+sqlalchemy
+pydantic[email]
+python-dotenv
+pymupdf
+google-genai
+python-multipart
+celery
+redis
+psycopg2-binary
+# --- Auth ---
+bcrypt
+python-jose[cryptography]
+alembic
+asyncpg
+# Optional — only needed for non-local resume storage:
+# boto3               # STORAGE_BACKEND=s3
+# google-cloud-storage  # STORAGE_BACKEND=gcs

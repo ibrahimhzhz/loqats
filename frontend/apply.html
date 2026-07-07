@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apply for Position | LoqATS Careers</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+            keyframes: {
+              "fade-in": { 
+                from: { opacity: 0, transform: "translateY(8px)" }, 
+                to: { opacity: 1, transform: "translateY(0)" } 
+              },
+              "pulse-slow": {
+                "0%, 100%": { opacity: 1 },
+                "50%": { opacity: 0.7 }
+              }
+            },
+            animation: {
+              "fade-in": "fade-in 0.3s ease-out",
+              "pulse-slow": "pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <!-- Inter + Space Grotesk Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+      :root {
+        --primary: #6366f1;
+        --primary-light: #818cf8;
+        --accent: #22d3ee;
+        --accent2: #a855f7;
+        --dark: #05050f;
+        --dark2: #0d0d20;
+        --dark3: #12122a;
+        --border: rgba(99,102,241,0.2);
+        --text-main: #e2e8f0;
+        --text-muted: #94a3b8;
+        --glass: rgba(255,255,255,0.03);
+        --glass-border: rgba(255,255,255,0.08);
+      }
+
+      * { font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
+      h1, h2, h3, h4 {
+        font-family: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: -0.02em;
+      }
+
+      body {
+        background: radial-gradient(circle at 14% 0%, rgba(99,102,241,0.12), transparent 36%),
+                    radial-gradient(circle at 86% 16%, rgba(168,85,247,0.1), transparent 38%),
+                    var(--dark) !important;
+      }
+
+      .bg-slate-900 {
+        background: linear-gradient(135deg, var(--primary), var(--accent2)) !important;
+        color: #fff !important;
+      }
+      .bg-slate-100 { background-color: rgba(99,102,241,0.14) !important; }
+      .bg-slate-50,
+      .bg-red-50,
+      .bg-emerald-50,
+      .from-blue-50,
+      .to-blue-100 { background: rgba(13,13,32,0.9) !important; }
+      .bg-white { background: var(--glass) !important; }
+
+      .text-slate-900,
+      .text-slate-700,
+      .text-slate-600,
+      .text-red-900,
+      .text-red-700,
+      .text-emerald-900,
+      .text-emerald-700 { color: var(--text-main) !important; }
+      .text-slate-500,
+      .text-slate-400,
+      .text-red-600,
+      .text-emerald-600 { color: var(--text-muted) !important; }
+
+      .border-slate-300,
+      .border-slate-200,
+      .border-red-200,
+      .border-emerald-200 { border-color: var(--border) !important; }
+
+      .hover\:bg-slate-800:hover { filter: brightness(1.08); }
+      .focus\:ring-slate-900:focus { --tw-ring-color: rgba(99,102,241,0.35) !important; }
+
+      header {
+        background: rgba(5,5,15,0.7) !important;
+        backdrop-filter: blur(20px);
+      }
+
+      input, textarea {
+        background: var(--dark2) !important;
+        color: var(--text-main) !important;
+        border-color: var(--border) !important;
+      }
+      input::placeholder,
+      textarea::placeholder { color: var(--text-muted) !important; }
+
+      .shadow-sm { box-shadow: 0 16px 40px rgba(0,0,0,0.34) !important; }
+
+      .drag-over {
+        border-color: var(--primary) !important;
+        background-color: rgba(99,102,241,0.12) !important;
+      }
+
+      .file-selected {
+        border-color: var(--accent) !important;
+        background-color: rgba(34,211,238,0.1) !important;
+      }
+
+      .field-error {
+        color: #fca5a5;
+        font-size: 0.75rem;
+        margin-top: 0.35rem;
+      }
+
+      .error-input {
+        border-color: rgba(239, 68, 68, 0.8) !important;
+      }
+
+      .error-banner {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #fecaca;
+      }
+
+      .deadline-amber {
+        background: rgba(245, 158, 11, 0.15);
+        border: 1px solid rgba(245, 158, 11, 0.5);
+        color: #fde68a;
+      }
+
+      .deadline-red {
+        background: rgba(239, 68, 68, 0.16);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        color: #fecaca;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        line-height: 1rem;
+        font-weight: 600;
+        padding: 0.3rem 0.65rem;
+        border: 1px solid var(--border);
+        background: rgba(99,102,241,0.12);
+        color: var(--text-main);
+      }
+
+      .collapsible-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        border-radius: 9999px;
+        padding: 0.2rem 0.55rem;
+      }
+
+      .muted-note {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        margin-top: 0.35rem;
+      }
+
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: var(--dark) !important; }
+      ::-webkit-scrollbar-thumb { background: var(--primary) !important; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--primary-light) !important; }
+    </style>
+  </head>
+  <body class="h-full bg-gradient-to-br from-blue-50 to-blue-100 text-slate-900 antialiased">
+    
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 backdrop-blur">
+      <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-md bg-slate-900 flex items-center justify-center">
+            <i data-lucide="zap" class="w-5 h-5 text-blue-200"></i>
+          </div>
+          <span class="font-semibold text-slate-900 tracking-tight">LoqATS Careers</span>
+        </div>
+        <span class="text-sm text-slate-500">Public Application Portal</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-6 py-12">
+      
+      <!-- Loading State -->
+      <div id="loading-state" class="animate-fade-in text-center py-20">
+        <div class="inline-block w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mb-4"></div>
+        <p class="text-slate-600">Loading job details...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="error-state" class="hidden animate-fade-in">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+          <i data-lucide="alert-circle" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
+          <h2 class="text-xl font-semibold text-red-900 mb-2">Job Not Found</h2>
+          <p class="text-red-700">This job posting is no longer available or the link is incorrect.</p>
+        </div>
+      </div>
+
+      <!-- Internal / Blocked State -->
+      <div id="blocked-state" class="hidden animate-fade-in">
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-8 text-center">
+          <i data-lucide="eye-off" class="w-12 h-12 text-slate-500 mx-auto mb-4"></i>
+          <h2 class="text-xl font-semibold text-slate-900 mb-2">This position is not publicly listed</h2>
+          <p class="text-slate-500">Please contact the hiring team for a direct application link.</p>
+        </div>
+      </div>
+
+      <!-- Success State -->
+      <div id="success-state" class="hidden animate-fade-in">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-8 text-center">
+          <div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="check" class="w-8 h-8 text-white"></i>
+          </div>
+          <h2 class="text-2xl font-semibold text-emerald-900 mb-2">Application Received!</h2>
+          <p class="text-emerald-700 mb-6">Thank you for applying. We'll review your application and get back to you soon.</p>
+          <p class="text-sm text-emerald-600">You can safely close this window.</p>
+        </div>
+      </div>
+
+      <!-- Application Form -->
+      <div id="form-container" class="hidden animate-fade-in">
+        
+        <!-- Job Details Card -->
+        <div class="bg-white rounded-lg border border-slate-200 p-8 mb-6 shadow-sm">
+          <h1 id="job-title" class="text-3xl font-bold text-slate-900 mb-4"></h1>
+          <div class="flex items-center flex-wrap gap-2 mb-3" id="job-badges"></div>
+          <div id="office-location-line" class="text-xs text-slate-400 mb-4 hidden"></div>
+
+          <div id="salary-block" class="hidden mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <p class="text-xs text-slate-400 uppercase tracking-wide mb-1">Compensation</p>
+            <p id="salary-text" class="text-sm font-semibold text-slate-900"></p>
+          </div>
+
+          <div id="deadline-banner" class="hidden mb-4 rounded-lg px-3 py-2 text-sm font-medium"></div>
+
+          <div id="benefits-block" class="hidden mb-5">
+            <p class="text-xs text-slate-400 uppercase tracking-wide mb-2">Benefits</p>
+            <div id="benefits-row" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <div class="flex items-center gap-4 text-sm text-slate-500 mb-6">
+            <div class="flex items-center gap-1">
+              <i data-lucide="briefcase" class="w-4 h-4"></i>
+              <span id="job-experience"></span>
+            </div>
+            <div class="flex items-center gap-1">
+              <i data-lucide="code" class="w-4 h-4"></i>
+              <span id="job-skills-count"></span>
+            </div>
+          </div>
+          <div id="job-description" class="prose prose-slate max-w-none text-slate-700 leading-relaxed"></div>
+          
+          <!-- Required Skills -->
+          <div class="mt-6">
+            <h3 class="text-sm font-semibold text-slate-900 mb-3">Required Skills</h3>
+            <div id="job-skills" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+
+        <!-- Application Form Card -->
+        <div class="bg-white rounded-lg border border-slate-200 p-8 shadow-sm">
+          <h2 class="text-xl font-semibold text-slate-900 mb-6">Submit Your Application</h2>
+          
+          <form id="application-form">
+
+            <div id="form-error-banner" class="error-banner rounded-lg px-3 py-2 text-sm mb-4 hidden"></div>
+            
+            <!-- Honeypot Field (hidden from humans, visible to bots) -->
+            <input type="text" name="website_url_catch" style="position: absolute; left: -9999px;" tabindex="-1" autocomplete="off" />
+            
+            <!-- Name -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Full Name <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                required 
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                placeholder="John Doe"
+              />
+              <p id="error-name" class="field-error hidden"></p>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Email Address <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                required 
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                placeholder="john@example.com"
+              />
+              <p id="error-email" class="field-error hidden"></p>
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Phone Number
+              </label>
+              <input 
+                type="tel" 
+                id="phone" 
+                name="phone" 
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                placeholder="+1 (555) 123-4567"
+              />
+              <p id="error-phone" class="field-error hidden"></p>
+            </div>
+
+            <!-- Dynamic Fields Container -->
+            <div id="dynamic-fields"></div>
+
+            <!-- Resume Upload -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Resume (PDF) <span class="text-red-500">*</span>
+              </label>
+              <div 
+                id="drop-zone"
+                class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-slate-400 transition"
+              >
+                <input 
+                  type="file" 
+                  id="resume" 
+                  name="resume" 
+                  accept=".pdf" 
+                  required 
+                  class="hidden"
+                />
+                <i data-lucide="upload" class="w-8 h-8 text-slate-400 mx-auto mb-2" id="upload-icon"></i>
+                <p class="text-slate-600 font-medium mb-1" id="upload-text">Click to upload or drag and drop</p>
+                <p class="text-slate-500 text-sm" id="upload-subtext">PDF only (max 10MB)</p>
+                <p class="text-emerald-600 text-sm font-medium mt-2 hidden" id="file-name"></p>
+              </div>
+              <p id="error-resume" class="field-error hidden"></p>
+            </div>
+
+            <!-- Submit Button -->
+            <button 
+              type="submit" 
+              id="submit-btn"
+              class="w-full bg-slate-900 text-white font-semibold py-3 px-6 rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-2"
+            >
+              <span>Submit Application</span>
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Loading State for Submit -->
+            <div id="submit-loading" class="hidden w-full bg-slate-900 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-2">
+              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Processing...</span>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white mt-16">
+      <div class="max-w-4xl mx-auto px-6 py-8 text-center text-sm text-slate-500">
+        <p>Powered by <span class="font-semibold text-slate-900">LoqATS</span> — AI Recruiting Platform</p>
+      </div>
+    </footer>
+
+    <script>
+      // Initialize Lucide icons
+      lucide.createIcons();
+
+      // Get job ID from URL path
+      const pathParts = window.location.pathname.split('/');
+      const jobId = pathParts[pathParts.indexOf('apply') + 1];
+
+      // State
+      let jobData = null;
+
+      // DOM Elements
+      const loadingState = document.getElementById('loading-state');
+      const errorState = document.getElementById('error-state');
+      const blockedState = document.getElementById('blocked-state');
+      const successState = document.getElementById('success-state');
+      const formContainer = document.getElementById('form-container');
+      const applicationForm = document.getElementById('application-form');
+      const submitBtn = document.getElementById('submit-btn');
+      const submitLoading = document.getElementById('submit-loading');
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('resume');
+      const uploadIcon = document.getElementById('upload-icon');
+      const uploadText = document.getElementById('upload-text');
+      const uploadSubtext = document.getElementById('upload-subtext');
+      const fileName = document.getElementById('file-name');
+      const formErrorBanner = document.getElementById('form-error-banner');
+
+      let isClosed = false;
+
+      function setTopError(message) {
+        if (!message) {
+          formErrorBanner.classList.add('hidden');
+          formErrorBanner.textContent = '';
+          return;
+        }
+        formErrorBanner.textContent = message;
+        formErrorBanner.classList.remove('hidden');
+      }
+
+      function formatMoney(value, currency = 'USD') {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) return null;
+        const symbols = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', INR: '₹' };
+        const n = Number(value);
+        const symbol = symbols[currency] || `${currency} `;
+        return `${symbol}${n.toLocaleString()}`;
+      }
+
+      function payFrequencyLabel(value) {
+        const map = { Annual: 'year', Monthly: 'month', Hourly: 'hour' };
+        return map[value] || String(value || '').toLowerCase();
+      }
+
+      function parseDateOnly(value) {
+        if (!value) return null;
+        return new Date(`${value}T00:00:00`);
+      }
+
+      function daysUntil(value) {
+        const dt = parseDateOnly(value);
+        if (!dt) return null;
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        return Math.ceil((dt - now) / (24 * 60 * 60 * 1000));
+      }
+
+      function clearFieldErrors() {
+        document.querySelectorAll('.field-error').forEach((el) => {
+          el.textContent = '';
+          el.classList.add('hidden');
+        });
+        document.querySelectorAll('.error-input').forEach((el) => el.classList.remove('error-input'));
+      }
+
+      function setFieldError(fieldId, message) {
+        const input = document.getElementById(fieldId);
+        const err = document.getElementById(`error-${fieldId}`);
+        if (input) input.classList.add('error-input');
+        if (err) {
+          err.textContent = message;
+          err.classList.remove('hidden');
+        }
+      }
+
+      function isValidEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+      }
+
+      function isValidUrl(value) {
+        try {
+          const parsed = new URL(value);
+          return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+        } catch {
+          return false;
+        }
+      }
+
+      function validateLinkedIn(value) {
+        const normalized = String(value || '').trim().replace(/^https?:\/\//i, '').replace(/^www\./i, '');
+        return normalized.toLowerCase().startsWith('linkedin.com/in/');
+      }
+
+      function syncCounter(id, max = 500) {
+        const input = document.getElementById(id);
+        const counter = document.getElementById(`${id}-counter`);
+        if (!input || !counter) return;
+        const n = input.value.length;
+        counter.textContent = `${n}/${max}`;
+      }
+
+      // Fetch job details
+      async function loadJob() {
+        try {
+          const response = await fetch(`/api/public/job/${jobId}`);
+
+          if (response.status === 403) {
+            const payload = await response.json().catch(() => ({}));
+            loadingState.classList.add('hidden');
+            blockedState.classList.remove('hidden');
+            if (payload?.detail) {
+              blockedState.querySelector('p').textContent = payload.detail;
+            }
+            lucide.createIcons();
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error('Job not found');
+          }
+
+          jobData = await response.json();
+          renderJob();
+          
+          loadingState.classList.add('hidden');
+          formContainer.classList.remove('hidden');
+          
+        } catch (error) {
+          console.error('Error loading job:', error);
+          loadingState.classList.add('hidden');
+          errorState.classList.remove('hidden');
+          blockedState.classList.add('hidden');
+        }
+      }
+
+      // Render job details
+      function renderJob() {
+        document.getElementById('job-title').textContent = jobData.title;
+        document.getElementById('job-experience').textContent = `${jobData.min_experience}+ years experience`;
+        document.getElementById('job-skills-count').textContent = `${jobData.required_skills.length} skills required`;
+        const descriptionElement = document.getElementById('job-description');
+        descriptionElement.style.whiteSpace = 'pre-line';
+        descriptionElement.textContent = jobData.description || '';
+        
+        // Render skills
+        const skillsContainer = document.getElementById('job-skills');
+        skillsContainer.innerHTML = '';
+        jobData.required_skills.forEach(skill => {
+          const badge = document.createElement('span');
+          badge.className = 'px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-full';
+          badge.textContent = skill;
+          skillsContainer.appendChild(badge);
+        });
+
+        renderHeaderMeta();
+        renderDynamicFields(jobData);
+      }
+
+      function renderHeaderMeta() {
+        const badges = document.getElementById('job-badges');
+        badges.innerHTML = '';
+
+        if (jobData.department) {
+          badges.innerHTML += `<span class="pill">${jobData.department}</span>`;
+        }
+        if (jobData.job_type) {
+          badges.innerHTML += `<span class="pill">${jobData.job_type}</span>`;
+        }
+        if (jobData.work_location_type) {
+          badges.innerHTML += `<span class="pill">${jobData.work_location_type}</span>`;
+        }
+
+        const officeLine = document.getElementById('office-location-line');
+        if ((jobData.work_location_type === 'Hybrid' || jobData.work_location_type === 'On-site') && jobData.office_location) {
+          officeLine.textContent = `Office location: ${jobData.office_location}`;
+          officeLine.classList.remove('hidden');
+        } else {
+          officeLine.classList.add('hidden');
+        }
+
+        const salaryBlock = document.getElementById('salary-block');
+        const salaryText = document.getElementById('salary-text');
+        if (jobData.show_salary) {
+          const min = formatMoney(jobData.salary_min, jobData.currency);
+          const max = formatMoney(jobData.salary_max, jobData.currency);
+          const freq = payFrequencyLabel(jobData.pay_frequency);
+          if (min && max) salaryText.textContent = `${min} – ${max} / ${freq}`;
+          else if (min) salaryText.textContent = `From ${min} / ${freq}`;
+          else if (max) salaryText.textContent = `Up to ${max} / ${freq}`;
+          else salaryText.textContent = `Compensation shared during process`;
+          salaryBlock.classList.remove('hidden');
+        } else {
+          salaryBlock.classList.add('hidden');
+        }
+
+        const benefitsBlock = document.getElementById('benefits-block');
+        const benefitsRow = document.getElementById('benefits-row');
+        benefitsRow.innerHTML = '';
+        if (Array.isArray(jobData.benefits) && jobData.benefits.length > 0) {
+          jobData.benefits.forEach((benefit) => {
+            const el = document.createElement('span');
+            el.className = 'pill';
+            el.textContent = benefit;
+            benefitsRow.appendChild(el);
+          });
+          benefitsBlock.classList.remove('hidden');
+        } else {
+          benefitsBlock.classList.add('hidden');
+        }
+
+        const deadlineBanner = document.getElementById('deadline-banner');
+        deadlineBanner.className = 'hidden mb-4 rounded-lg px-3 py-2 text-sm font-medium';
+        isClosed = false;
+        if (jobData.application_deadline) {
+          const deadlineDate = parseDateOnly(jobData.application_deadline);
+          const days = daysUntil(jobData.application_deadline);
+          if (days !== null && days < 0) {
+            deadlineBanner.textContent = 'Applications for this position are closed';
+            deadlineBanner.classList.add('deadline-red');
+            deadlineBanner.classList.remove('hidden');
+            isClosed = true;
+          } else if (days !== null && days <= 3) {
+            deadlineBanner.textContent = `Applications close on ${deadlineDate.toLocaleDateString()}.`;
+            deadlineBanner.classList.add('deadline-amber');
+            deadlineBanner.classList.remove('hidden');
+          } else {
+            deadlineBanner.textContent = `Applications close on ${deadlineDate.toLocaleDateString()}.`;
+            deadlineBanner.classList.add('deadline-amber');
+            deadlineBanner.classList.remove('hidden');
+          }
+        }
+
+        if (isClosed) {
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+          submitBtn.querySelector('span').textContent = 'Applications Closed';
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+          submitBtn.querySelector('span').textContent = 'Submit Application';
+        }
+      }
+
+      // Render dynamic form fields
+      function renderDynamicFields(config) {
+        const container = document.getElementById('dynamic-fields');
+        container.innerHTML = '';
+
+        const escapeHtml = (value) => String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+
+        // LinkedIn
+        if (config.require_linkedin === true) {
+          container.innerHTML += `
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                LinkedIn URL <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="linkedin_url"
+                name="linkedin_url"
+                required
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                placeholder="linkedin.com/in/yourprofile"
+              />
+              <p class="muted-note">Must start with linkedin.com/in/</p>
+              <p id="error-linkedin_url" class="field-error hidden"></p>
+            </div>
+          `;
+        }
+
+        // Portfolio
+        if (config.require_portfolio === true) {
+          container.innerHTML += `
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Portfolio / GitHub URL <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="url" 
+                id="portfolio_url" 
+                name="portfolio_url" 
+                required
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                placeholder="https://yourportfolio.com"
+              />
+              <p id="error-portfolio_url" class="field-error hidden"></p>
+            </div>
+          `;
+        }
+
+        if (config.require_cover_letter === true) {
+          container.innerHTML += `
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Cover Letter <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="cover_letter"
+                name="cover_letter"
+                rows="6"
+                minlength="100"
+                required
+                oninput="syncCounter('cover_letter', 4000)"
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                placeholder="Tell us why you're a strong fit for this role..."
+              ></textarea>
+              <div class="text-xs text-slate-400 mt-1" id="cover_letter-counter">0/4000</div>
+              <p id="error-cover_letter" class="field-error hidden"></p>
+            </div>
+          `;
+        }
+
+        // Custom questions
+        if (config.custom_questions && config.custom_questions.length > 0) {
+          container.innerHTML += `
+            <div class="mb-3 mt-1">
+              <h3 class="text-sm font-semibold text-slate-900">A few questions from the hiring team</h3>
+            </div>
+          `;
+          config.custom_questions.forEach((question, index) => {
+            container.innerHTML += `
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  ${escapeHtml(question)} <span class="text-red-500">*</span>
+                </label>
+                <textarea 
+                  id="custom_${index}" 
+                  name="custom_${index}" 
+                  rows="3"
+                  maxlength="500"
+                  required
+                  oninput="syncCounter('custom_${index}', 500)"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                  placeholder="Your answer..."
+                ></textarea>
+                <div class="text-xs text-slate-400 mt-1" id="custom_${index}-counter">0/500</div>
+                <p id="error-custom_${index}" class="field-error hidden"></p>
+              </div>
+            `;
+          });
+        }
+
+        lucide.createIcons();
+      }
+
+      // File upload handling
+      dropZone.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          handleFile(file);
+        }
+      });
+
+      // Drag and drop
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+          fileInput.files = e.dataTransfer.files;
+          handleFile(file);
+        } else {
+          setFieldError('resume', 'Please upload a PDF file.');
+        }
+      });
+
+      function handleFile(file) {
+        clearFieldErrors();
+        if (file.size > 10 * 1024 * 1024) {
+          setFieldError('resume', 'File size must be less than 10MB.');
+          return;
+        }
+        
+        dropZone.classList.add('file-selected');
+        fileName.textContent = `✓ ${file.name}`;
+        fileName.classList.remove('hidden');
+        uploadText.textContent = 'Resume selected';
+        uploadSubtext.classList.add('hidden');
+        
+        // Change icon
+        uploadIcon.setAttribute('data-lucide', 'file-check');
+        uploadIcon.classList.remove('text-slate-400');
+        uploadIcon.classList.add('text-emerald-500');
+        lucide.createIcons();
+      }
+
+      // Form submission
+      applicationForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        setTopError('');
+        clearFieldErrors();
+
+        if (isClosed) {
+          setTopError('Applications for this position are no longer being accepted');
+          return;
+        }
+
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const resumeFile = fileInput.files[0];
+        const errors = {};
+
+        if (!name) errors.name = 'Full Name is required.';
+        if (!email) errors.email = 'Email is required.';
+        else if (!isValidEmail(email)) errors.email = 'Please enter a valid email address.';
+
+        if (!resumeFile) errors.resume = 'Resume PDF is required.';
+        else {
+          const isPdf = resumeFile.type === 'application/pdf' || resumeFile.name.toLowerCase().endsWith('.pdf');
+          if (!isPdf) errors.resume = 'Resume must be a PDF file.';
+          else if (resumeFile.size > 10 * 1024 * 1024) errors.resume = 'Resume must be under 10MB.';
+        }
+
+        const linkedinInput = document.getElementById('linkedin_url');
+        const portfolioInput = document.getElementById('portfolio_url');
+        const coverLetterInput = document.getElementById('cover_letter');
+
+        if (linkedinInput) {
+          const value = linkedinInput.value.trim();
+          if (!value) errors.linkedin_url = 'LinkedIn URL is required.';
+          else if (!validateLinkedIn(value)) errors.linkedin_url = 'LinkedIn URL must start with linkedin.com/in/';
+        }
+
+        if (portfolioInput) {
+          const value = portfolioInput.value.trim();
+          if (!value) errors.portfolio_url = 'Portfolio / GitHub URL is required.';
+          else if (!isValidUrl(value)) errors.portfolio_url = 'Please enter a valid URL (http(s)://...)';
+        }
+
+        if (coverLetterInput) {
+          const value = coverLetterInput.value.trim();
+          if (!value) errors.cover_letter = 'Cover letter is required.';
+          else if (value.length < 100) errors.cover_letter = 'Cover letter must be at least 100 characters.';
+        }
+
+        const customAnswers = [];
+        if (Array.isArray(jobData.custom_questions) && jobData.custom_questions.length > 0) {
+          jobData.custom_questions.forEach((question, index) => {
+            const input = document.getElementById(`custom_${index}`);
+            const answer = input?.value?.trim() || '';
+            if (!answer) {
+              errors[`custom_${index}`] = 'This answer is required.';
+            } else {
+              customAnswers.push({ question, answer });
+            }
+          });
+        }
+
+        const fieldsWithErrors = Object.keys(errors);
+        if (fieldsWithErrors.length > 0) {
+          fieldsWithErrors.forEach((field) => setFieldError(field, errors[field]));
+          return;
+        }
+
+        // Collect form data
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('phone', phone || '');
+        formData.append('resume', resumeFile);
+        formData.append('website_url_catch', document.querySelector('[name="website_url_catch"]').value);
+
+        // Dynamic fields
+        if (linkedinInput) formData.append('linkedin_url', linkedinInput.value.trim());
+        if (portfolioInput) formData.append('portfolio_url', portfolioInput.value.trim());
+        if (coverLetterInput) formData.append('cover_letter', coverLetterInput.value.trim());
+
+        if (customAnswers.length > 0) {
+          formData.append('custom_answers_json', JSON.stringify(customAnswers));
+        }
+
+        // Show loading state
+        submitBtn.classList.add('hidden');
+        submitLoading.classList.remove('hidden');
+
+        try {
+          const response = await fetch(`/api/public/apply/${jobId}`, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Submission failed');
+          }
+
+          // Show success state
+          formContainer.classList.add('hidden');
+          successState.classList.remove('hidden');
+          lucide.createIcons();
+
+        } catch (error) {
+          console.error('Submission error:', error);
+          setTopError(error.message || 'Failed to submit application. Please try again.');
+          submitBtn.classList.remove('hidden');
+          submitLoading.classList.add('hidden');
+        }
+      });
+
+      // Load job on page load
+      loadJob();
+    </script>
+
+  </body>
+</html>

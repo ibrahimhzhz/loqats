@@ -1,0 +1,12 @@
+# Caddy automatically obtains and renews a Let's Encrypt HTTPS certificate for
+# the domain below, then reverse-proxies to the FastAPI app. Before starting
+# this container, your domain's DNS A record MUST already point at this VM's
+# public IP, or certificate issuance will fail (and repeated failures can hit
+# Let's Encrypt's rate limit). See ORACLE_DEPLOYMENT.md §7.
+#
+# Replace the placeholder below with your real domain, then run:
+#   docker compose -f docker-compose.prod.yml up -d caddy
+
+yourdomain.com {
+    reverse_proxy web:8000
+}

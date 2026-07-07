@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoqATS — Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/loqats.css" />
+</head>
+<body>
+  <!-- App bar -->
+  <header class="appbar">
+    <div class="wrap inner">
+      <div class="brand"><span class="glyph">Lq</span> LoqATS</div>
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-view="pool">Talent pool</button>
+        <button class="tab" data-view="interviews">Interviews</button>
+        <button class="tab" data-view="offers">Offers</button>
+        <button class="tab" data-view="team">Team</button>
+        <button class="tab" data-view="audit">Audit</button>
+      </nav>
+      <div class="row">
+        <span class="chip" id="whoami"><span class="dot"></span> …</span>
+        <button class="btn btn-quiet btn-sm" onclick="logout()">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" style="padding-top:28px; padding-bottom:60px">
+    <!-- Overview tiles -->
+    <section class="tiles" id="tiles" style="margin-bottom:26px"></section>
+
+    <!-- ============ TALENT POOL ============ -->
+    <section id="view-pool" class="view">
+      <div class="spread" style="margin-bottom:16px">
+        <div>
+          <div class="eyebrow">Every candidate you've ever screened</div>
+          <h2>Talent pool</h2>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="exportSelected()">Export selected (CSV)</button>
+      </div>
+
+      <div class="card card-pad" style="margin-bottom:18px">
+        <div class="grid" style="grid-template-columns: 2fr 1fr 1fr auto; align-items:end">
+          <label class="field"><span>Search name, skill, or title</span>
+            <input id="q" placeholder="e.g. React fintech" onkeydown="if(event.key==='Enter')runSearch()"/></label>
+          <label class="field"><span>Required skills (comma-sep)</span>
+            <input id="skills" placeholder="Python, AWS" onkeydown="if(event.key==='Enter')runSearch()"/></label>
+          <label class="field"><span>Min score</span>
+            <input id="minScore" type="number" min="0" max="100" placeholder="65"/></label>
+          <button class="btn btn-primary" onclick="runSearch()">Search</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3 id="poolCount">Results</h3></div>
+        <div style="overflow-x:auto">
+          <table class="data">
+            <thead><tr>
+              <th style="width:34px"></th><th>Candidate</th><th>Match</th>
+              <th>Experience</th><th>Stage</th><th>Top skills</th><th></th>
+            </tr></thead>
+            <tbody id="poolBody"><tr><td colspan="7" class="empty">Run a search to see candidates.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INTERVIEWS ============ -->
+    <section id="view-interviews" class="view hide">
+      <div class="eyebrow">Scheduled</div>
+      <h2 style="margin-bottom:16px">Upcoming interviews</h2>
+      <div class="card">
+        <div style="overflow-x:auto">
+          <table class="data">
+            <thead><tr><th>When</th><th>Candidate</th><th>Interview</th><th>Where</th><th>Status</th><th></th></tr></thead>
+            <tbody id="ivBody"><tr><td colspan="6" class="empty">No interviews scheduled yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OFFERS ============ -->
+    <section id="view-offers" class="view hide">
+      <div class="eyebrow">Offer stage</div>
+      <h2 style="margin-bottom:16px">Offers</h2>
+      <div class="card">
+        <div style="overflow-x:auto">
+          <table class="data">
+            <thead><tr><th>Candidate ID</th><th>Role</th><th>Compensation</th><th>Status</th><th>Sent</th><th></th></tr></thead>
+            <tbody id="offBody"><tr><td colspan="6" class="empty">No offers yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TEAM ============ -->
+    <section id="view-team" class="view hide">
+      <div class="spread" style="margin-bottom:16px">
+        <div><div class="eyebrow">Collaboration</div><h2>Team</h2></div>
+        <button class="btn btn-primary btn-sm" onclick="openInvite()">Invite teammate</button>
+      </div>
+      <div class="card">
+        <div style="overflow-x:auto">
+          <table class="data">
+            <thead><tr><th>Member</th><th>Role</th><th></th></tr></thead>
+            <tbody id="teamBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AUDIT ============ -->
+    <section id="view-audit" class="view hide">
+      <div class="eyebrow">Defend every decision</div>
+      <h2 style="margin-bottom:16px">Audit trail</h2>
+      <div class="card card-pad"><div id="auditFeed" class="stack"></div></div>
+    </section>
+  </main>
+
+  <div class="toasts" id="toasts"></div>
+  <div id="modalRoot"></div>
+
+  <script src="/static/js/auth.js"></script>
+  <script>
+    const T = () => localStorage.getItem("access_token");
+    if (!T()) location.href = "/login";
+
+    async function api(path, opts = {}) {
+      const r = await fetch(path, {
+        ...opts,
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + T(), ...(opts.headers||{}) },
+      });
+      if (r.status === 401) { logout(); return; }
+      return r;
+    }
+    function logout(){ localStorage.removeItem("access_token"); location.href = "/login"; }
+
+    function toast(msg, err=false){
+      const t = document.createElement("div");
+      t.className = "toast" + (err ? " err" : "");
+      t.textContent = msg;
+      document.getElementById("toasts").appendChild(t);
+      setTimeout(() => t.remove(), 3800);
+    }
+    function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function initials(name){ return (name||"?").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase(); }
+    function ringClass(v){ return v>=65 ? "" : v>=40 ? "warn" : "low"; }
+
+    // — navigation —
+    document.getElementById("tabs").addEventListener("click", e => {
+      const b = e.target.closest(".tab"); if(!b) return;
+      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+      b.classList.add("active");
+      const v = b.dataset.view;
+      document.querySelectorAll(".view").forEach(s=>s.classList.add("hide"));
+      document.getElementById("view-"+v).classList.remove("hide");
+      if (v==="interviews") loadInterviews();
+      if (v==="offers") loadOffers();
+      if (v==="team") loadTeam();
+      if (v==="audit") loadAudit();
+    });
+
+    // — whoami + tiles —
+    async function boot(){
+      try {
+        const me = await (await api("/auth/me")).json();
+        document.getElementById("whoami").innerHTML = `<span class="dot"></span> ${esc(me.email)} · ${esc(me.role)}`;
+      } catch {}
+      loadTiles();
+      runSearch();
+    }
+
+    async function loadTiles(){
+      // Derive lightweight stats from talent pool + interviews + offers
+      const [poolR, ivR, offR] = await Promise.all([
+        api("/api/talent-pool/search", { method:"POST", body: JSON.stringify({ limit: 200 }) }),
+        api("/api/interviews"), api("/api/offers"),
+      ]);
+      const pool = poolR ? (await poolR.json()) : {count:0,results:[]};
+      const ivs = ivR ? (await ivR.json()).interviews : [];
+      const offs = offR ? (await offR.json()).offers : [];
+      const strong = pool.results.filter(r => (r.match_score||0) >= 65).length;
+      const tiles = [
+        { k:"Candidates", v: pool.count, d:"in your talent pool" },
+        { k:"Strong matches", v: strong, d:"score ≥ 65" },
+        { k:"Interviews", v: ivs.length, d:"upcoming" },
+        { k:"Offers out", v: offs.filter(o=>o.status==='sent').length, d:"awaiting response" },
+      ];
+      document.getElementById("tiles").innerHTML = tiles.map(t=>`
+        <div class="tile"><div class="k">${t.k}</div><div class="v mono">${t.v}</div><div class="d">${t.d}</div></div>`).join("");
+    }
+
+    // — talent pool —
+    let selected = new Set();
+    async function runSearch(){
+      const body = { limit: 50 };
+      const q = document.getElementById("q").value.trim();
+      const sk = document.getElementById("skills").value.trim();
+      const ms = document.getElementById("minScore").value;
+      if (q) body.query = q;
+      if (sk) body.skills = sk.split(",").map(s=>s.trim()).filter(Boolean);
+      if (ms) body.min_score = parseInt(ms, 10);
+
+      const r = await api("/api/talent-pool/search", { method:"POST", body: JSON.stringify(body) });
+      if(!r) return;
+      const data = await r.json();
+      document.getElementById("poolCount").textContent = `${data.count} candidate${data.count===1?"":"s"}`;
+      const tb = document.getElementById("poolBody");
+      if (!data.results.length){ tb.innerHTML = `<tr><td colspan="7" class="empty"><div class="big">No matches</div>Try broadening your skills or lowering the score floor.</td></tr>`; return; }
+      tb.innerHTML = data.results.map(c => `
+        <tr>
+          <td><input type="checkbox" style="width:auto" onchange="toggleSel(${c.id}, this.checked)" ${selected.has(c.id)?"checked":""}/></td>
+          <td><div class="row"><div class="avatar">${initials(c.name)}</div>
+            <div><div style="font-weight:600">${esc(c.name||"Unknown")}</div>
+            <div class="muted" style="font-size:.8rem">${esc(c.email||"")}</div></div></div></td>
+          <td><div class="score-ring" style="--val:${c.match_score||0}; --size:44px" >
+              <b style="font-size:.82rem">${c.match_score||0}</b></div></td>
+          <td class="mono">${c.years_experience||0} yrs</td>
+          <td><span class="chip">${esc(c.pipeline_stage||"Applied")}</span></td>
+          <td>${(c.skills||[]).slice(0,4).map(s=>`<span class="chip" style="margin:2px">${esc(s)}</span>`).join("")}</td>
+          <td class="row" style="gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="openInterview(${c.id}, '${esc(c.name)}')">Interview</button>
+            <button class="btn btn-quiet btn-sm" onclick="openOffer(${c.id}, '${esc(c.name)}')">Offer</button>
+          </td>
+        </tr>`).join("");
+    }
+    function toggleSel(id, on){ on ? selected.add(id) : selected.delete(id); }
+
+    async function exportSelected(){
+      if (!selected.size) return toast("Select candidates first.", true);
+      const r = await api("/api/export/candidates.csv", { method:"POST", body: JSON.stringify({ applicant_ids: [...selected] }) });
+      if(!r || !r.ok) return toast("Export failed.", true);
+      const blob = await r.blob(); const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = "candidates.csv"; a.click();
+      URL.revokeObjectURL(url); toast(`Exported ${selected.size} candidates.`);
+    }
+
+    // — interviews —
+    async function loadInterviews(){
+      const r = await api("/api/interviews"); if(!r) return;
+      const rows = (await r.json()).interviews;
+      const tb = document.getElementById("ivBody");
+      if(!rows.length){ tb.innerHTML = `<tr><td colspan="6" class="empty">No interviews scheduled yet.</td></tr>`; return; }
+      tb.innerHTML = rows.map(iv => `
+        <tr>
+          <td class="mono">${iv.start_time ? new Date(iv.start_time).toLocaleString() : "TBD"}</td>
+          <td style="font-weight:600">${esc(iv.candidate_name||"Candidate")}</td>
+          <td>${esc(iv.title)}</td>
+          <td>${iv.meeting_link ? `<a href="${esc(iv.meeting_link)}" target="_blank">Video link</a>` : esc(iv.location||"—")}</td>
+          <td><span class="chip chip-blue"><span class="dot"></span>${esc(iv.status)}</span></td>
+          <td><a class="btn btn-quiet btn-sm" href="/api/interviews/${iv.id}/ics" onclick="dlIcs(event, ${iv.id})">Add to calendar</a></td>
+        </tr>`).join("");
+    }
+    async function dlIcs(e, id){
+      e.preventDefault();
+      const r = await api(`/api/interviews/${id}/ics`); const blob = await r.blob();
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `interview-${id}.ics`; a.click();
+    }
+
+    // — offers —
+    async function loadOffers(){
+      const r = await api("/api/offers"); if(!r) return;
+      const rows = (await r.json()).offers;
+      const tb = document.getElementById("offBody");
+      if(!rows.length){ tb.innerHTML = `<tr><td colspan="6" class="empty">No offers yet.</td></tr>`; return; }
+      const chip = s => ({draft:"chip",sent:"chip chip-blue",accepted:"chip chip-green",declined:"chip chip-red",rescinded:"chip chip-amber"}[s]||"chip");
+      tb.innerHTML = rows.map(o => `
+        <tr>
+          <td class="mono">#${o.applicant_id}</td>
+          <td>${esc(o.job_title||"—")}</td>
+          <td class="mono">${o.salary_amount ? esc(o.currency)+" "+o.salary_amount.toLocaleString() : "—"}</td>
+          <td><span class="${chip(o.status)}"><span class="dot"></span>${esc(o.status)}</span></td>
+          <td class="mono">${o.sent_at ? new Date(o.sent_at).toLocaleDateString() : "—"}</td>
+          <td class="row" style="gap:6px">
+            ${o.status==="draft" ? `<button class="btn btn-primary btn-sm" onclick="sendOffer(${o.id})">Send</button>` : ""}
+            ${o.status==="sent" ? `<button class="btn btn-ghost btn-sm" onclick="respondOffer(${o.id},'accepted')">Mark accepted</button>
+              <button class="btn btn-quiet btn-sm" onclick="respondOffer(${o.id},'declined')">Declined</button>` : ""}
+          </td>
+        </tr>`).join("");
+    }
+    async function sendOffer(id){ const r = await api(`/api/offers/${id}/send`, {method:"POST"}); if(r&&r.ok){ toast("Offer sent."); loadOffers(); } else toast("Send failed.", true); }
+    async function respondOffer(id, status){ const r = await api(`/api/offers/${id}/respond`, {method:"PATCH", body: JSON.stringify({status})}); if(r&&r.ok){ toast(`Offer ${status}.`); loadOffers(); loadTiles(); } }
+
+    // — team —
+    async function loadTeam(){
+      const r = await api("/api/team"); if(!r) return;
+      const rows = (await r.json()).team;
+      document.getElementById("teamBody").innerHTML = rows.map(u => `
+        <tr>
+          <td><div class="row"><div class="avatar">${initials(u.email)}</div>${esc(u.email)}</div></td>
+          <td><span class="chip chip-teal">${esc(u.role)}</span></td>
+          <td></td>
+        </tr>`).join("");
+    }
+
+    // — audit —
+    async function loadAudit(){
+      const r = await api("/api/audit"); if(!r) return;
+      const events = (await r.json()).events;
+      const feed = document.getElementById("auditFeed");
+      if(!events.length){ feed.innerHTML = `<div class="empty">No activity recorded yet.</div>`; return; }
+      feed.innerHTML = events.map(e => `
+        <div class="spread" style="padding:10px 0; border-bottom:1px solid var(--line)">
+          <div class="row">
+            <span class="chip chip-teal mono" style="font-size:.68rem">${esc(e.action)}</span>
+            <span>${esc(e.summary||"")}</span>
+          </div>
+          <div class="muted mono" style="font-size:.74rem">${esc(e.actor_email||"system")} · ${e.created_at ? new Date(e.created_at).toLocaleString() : ""}</div>
+        </div>`).join("");
+    }
+
+    // — modals —
+    function closeModal(){ document.getElementById("modalRoot").innerHTML = ""; }
+    function modal(title, bodyHtml, footHtml){
+      document.getElementById("modalRoot").innerHTML = `
+        <div class="overlay" onclick="if(event.target===this)closeModal()">
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="m-head"><h3>${title}</h3><button class="btn btn-quiet btn-sm" onclick="closeModal()">✕</button></div>
+            <div class="m-body">${bodyHtml}</div>
+            <div class="m-foot">${footHtml}</div>
+          </div>
+        </div>`;
+    }
+
+    function openInvite(){
+      modal("Invite teammate", `
+        <label class="field" style="margin-bottom:14px"><span>Email</span><input id="inv-email" type="email" placeholder="teammate@company.com"/></label>
+        <label class="field" style="margin-bottom:14px"><span>Temporary password</span><input id="inv-pass" type="text" placeholder="min 8 characters"/></label>
+        <label class="field"><span>Role</span>
+          <select id="inv-role"><option value="recruiter">Recruiter</option><option value="hiring_manager">Hiring manager</option>
+          <option value="interviewer">Interviewer</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></label>`,
+        `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+         <button class="btn btn-primary" onclick="doInvite()">Send invite</button>`);
+    }
+    async function doInvite(){
+      const email = document.getElementById("inv-email").value.trim();
+      const password = document.getElementById("inv-pass").value;
+      const role = document.getElementById("inv-role").value;
+      const r = await api("/api/team/invite", {method:"POST", body: JSON.stringify({email, password, role})});
+      if(r&&r.ok){ toast("Teammate invited."); closeModal(); loadTeam(); }
+      else toast((r ? (await r.json()).detail : "Failed") || "Invite failed.", true);
+    }
+
+    function openInterview(aid, name){
+      modal(`Schedule interview · ${esc(name)}`, `
+        <label class="field" style="margin-bottom:14px"><span>Title</span><input id="iv-title" value="Technical interview"/></label>
+        <label class="field" style="margin-bottom:14px"><span>Date & time</span><input id="iv-when" type="datetime-local"/></label>
+        <label class="field" style="margin-bottom:14px"><span>Meeting link (optional)</span><input id="iv-link" placeholder="https://meet…"/></label>
+        <label class="field row" style="gap:8px"><input id="iv-notify" type="checkbox" checked style="width:auto"/><span style="margin:0">Email the candidate an invitation</span></label>`,
+        `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+         <button class="btn btn-primary" onclick="doInterview(${aid})">Schedule</button>`);
+    }
+    async function doInterview(aid){
+      const start = document.getElementById("iv-when").value;
+      if(!start) return toast("Pick a date and time.", true);
+      const body = { title: document.getElementById("iv-title").value, start_time: start,
+                     meeting_link: document.getElementById("iv-link").value || null,
+                     notify_candidate: document.getElementById("iv-notify").checked };
+      const r = await api(`/api/applicants/${aid}/interviews`, {method:"POST", body: JSON.stringify(body)});
+      if(r&&r.ok){ toast("Interview scheduled."); closeModal(); loadTiles(); } else toast("Could not schedule.", true);
+    }
+
+    function openOffer(aid, name){
+      modal(`Draft offer · ${esc(name)}`, `
+        <label class="field" style="margin-bottom:14px"><span>Compensation amount</span><input id="of-amt" type="number" placeholder="120000"/></label>
+        <div class="row" style="gap:12px; margin-bottom:14px">
+          <label class="field" style="flex:1"><span>Currency</span><input id="of-cur" value="USD"/></label>
+          <label class="field" style="flex:1"><span>Frequency</span>
+            <select id="of-freq"><option>Annual</option><option>Monthly</option><option>Hourly</option></select></label>
+        </div>
+        <label class="field"><span>Start date (optional)</span><input id="of-start" type="date"/></label>`,
+        `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+         <button class="btn btn-accent" onclick="doOffer(${aid})">Create draft</button>`);
+    }
+    async function doOffer(aid){
+      const body = { salary_amount: parseInt(document.getElementById("of-amt").value||"0",10) || null,
+                     currency: document.getElementById("of-cur").value || "USD",
+                     salary_frequency: document.getElementById("of-freq").value,
+                     start_date: document.getElementById("of-start").value || null };
+      const r = await api(`/api/applicants/${aid}/offers`, {method:"POST", body: JSON.stringify(body)});
+      if(r&&r.ok){ toast("Draft offer created — review it under Offers."); closeModal(); } else toast("Could not create offer.", true);
+    }
+
+    boot();
+  </script>
+</body>
+</html>

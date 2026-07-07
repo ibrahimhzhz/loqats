@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoqATS — Sign in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/loqats.css" />
+  <style>
+    body { min-height: 100vh; }
+    .split { display: grid; grid-template-columns: 1.05fr .95fr; min-height: 100vh; }
+    /* — left: brand narrative — */
+    .brandside {
+      background: var(--slate); color: #fff; padding: 48px 56px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; overflow: hidden;
+    }
+    .brandside::after {
+      content: ""; position: absolute; right: -120px; bottom: -120px; width: 340px; height: 340px;
+      background: radial-gradient(circle, rgba(14,124,107,.35), transparent 70%);
+    }
+    .brandside .brand { color: #fff; font-size: 1.4rem; }
+    .brandside .brand .glyph { background: var(--teal); color: #fff; }
+    .lede { font-family: var(--display); font-size: 2.4rem; line-height: 1.08; max-width: 12ch; margin-top: 8px; }
+    .lede em { font-style: italic; color: var(--coral); }
+    .subtext { color: #AEB4C6; max-width: 42ch; margin-top: 18px; }
+    /* signature receipt on the brand side */
+    .demo-receipt {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--r-lg); padding: 20px; margin-top: 30px; max-width: 380px;
+      position: relative; z-index: 1;
+    }
+    .demo-receipt .rtitle { font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: #8DE0D2; }
+    .demo-receipt .cand { display: flex; align-items: center; gap: 12px; margin: 12px 0 16px; }
+    .demo-receipt .cand .nm { font-weight: 600; }
+    .demo-receipt .cand .rl { color: #AEB4C6; font-size: .8rem; }
+    .demo-receipt .score-ring { --size: 60px; background:
+      radial-gradient(closest-side, var(--slate) 78%, transparent 79%),
+      conic-gradient(var(--teal) calc(var(--val) * 1%), rgba(255,255,255,.15) 0); }
+    .demo-receipt .score-ring b { color: #fff; }
+    .demo-receipt .ledger { color: #C7CCDA; min-width: 0; width: 100%; }
+    .demo-receipt .ledger .bar { background: rgba(255,255,255,.15); }
+    .foot-note { color: #7A8199; font-size: .78rem; position: relative; z-index: 1; }
+
+    /* — right: form — */
+    .formside { display: grid; place-items: center; padding: 40px 24px; }
+    .formcard { width: min(400px, 100%); }
+    .switcher { display: flex; gap: 4px; background: var(--porcelain); border: 1px solid var(--line); padding: 4px; border-radius: var(--r); margin-bottom: 24px; }
+    .switcher button { flex: 1; padding: 9px; border: 0; background: transparent; border-radius: var(--r-sm); font-weight: 600; font-size: .86rem; color: var(--ink-2); cursor: pointer; }
+    .switcher button.active { background: var(--paper); color: var(--ink); box-shadow: var(--shadow-1); }
+    .err-note { color: var(--red); font-size: .84rem; margin-top: 4px; min-height: 1.2em; }
+    @media (max-width: 860px) { .split { grid-template-columns: 1fr; } .brandside { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="split">
+    <!-- Brand narrative -->
+    <aside class="brandside">
+      <div class="brand"><span class="glyph">Lq</span> LoqATS</div>
+      <div>
+        <div class="eyebrow" style="color:#8DE0D2">Hiring, with receipts</div>
+        <h1 class="lede">Read every résumé. Trust <em>every</em> score.</h1>
+        <p class="subtext">Screen hundreds of candidates in minutes — and see the exact math behind every ranking. The AI extracts facts; you make the call.</p>
+
+        <div class="demo-receipt">
+          <div class="rtitle">Match receipt · live sample</div>
+          <div class="cand">
+            <div class="score-ring" style="--val:88"><b>88</b></div>
+            <div>
+              <div class="nm">Jane Okafor</div>
+              <div class="rl">Senior Python Engineer · 6 yrs</div>
+            </div>
+          </div>
+          <div class="ledger">
+            <div class="line"><span>Experience</span><span>23 / 30</span></div>
+            <div class="bar"><i style="width:77%"></i></div>
+            <div class="line"><span>Skills match</span><span>45 / 50</span></div>
+            <div class="bar"><i style="width:90%"></i></div>
+            <div class="line"><span>Education</span><span>20 / 20</span></div>
+            <div class="bar"><i style="width:100%"></i></div>
+          </div>
+        </div>
+      </div>
+      <p class="foot-note">Deterministic scoring · full audit trail · human-in-control</p>
+    </aside>
+
+    <!-- Auth form -->
+    <main class="formside">
+      <div class="formcard">
+        <div class="switcher" role="tablist">
+          <button id="tab-login" class="active" onclick="mode('login')">Sign in</button>
+          <button id="tab-register" onclick="mode('register')">Create account</button>
+        </div>
+
+        <h2 id="form-title" style="margin-bottom:4px">Welcome back</h2>
+        <p class="muted" id="form-sub" style="margin:0 0 22px">Sign in to your hiring workspace.</p>
+
+        <form id="auth-form" class="stack" onsubmit="submitForm(event)">
+          <label class="field" id="company-wrap" style="display:none">
+            <span>Company name</span>
+            <input id="company" type="text" autocomplete="organization" placeholder="Acme Inc" />
+          </label>
+          <label class="field">
+            <span>Work email</span>
+            <input id="email" type="email" autocomplete="email" placeholder="you@company.com" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="8" />
+          </label>
+          <div class="err-note" id="err"></div>
+          <button class="btn btn-primary" style="width:100%; justify-content:center" id="submit-btn" type="submit">Sign in</button>
+        </form>
+
+        <p class="muted" style="font-size:.8rem; margin-top:22px; text-align:center">
+          By continuing you agree to handle candidate data responsibly.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentMode = "login";
+    const API = ""; // same origin
+
+    function mode(m) {
+      currentMode = m;
+      const isReg = m === "register";
+      document.getElementById("tab-login").classList.toggle("active", !isReg);
+      document.getElementById("tab-register").classList.toggle("active", isReg);
+      document.getElementById("company-wrap").style.display = isReg ? "block" : "none";
+      document.getElementById("form-title").textContent = isReg ? "Create your workspace" : "Welcome back";
+      document.getElementById("form-sub").textContent = isReg
+        ? "Set up your company and first admin account."
+        : "Sign in to your hiring workspace.";
+      document.getElementById("submit-btn").textContent = isReg ? "Create account" : "Sign in";
+      document.getElementById("password").setAttribute("autocomplete", isReg ? "new-password" : "current-password");
+      document.getElementById("err").textContent = "";
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const err = document.getElementById("err");
+      const btn = document.getElementById("submit-btn");
+      err.textContent = "";
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      btn.disabled = true; btn.textContent = currentMode === "register" ? "Creating…" : "Signing in…";
+
+      try {
+        if (currentMode === "register") {
+          const company = document.getElementById("company").value.trim();
+          if (!company) throw new Error("Company name is required.");
+          const r = await fetch(API + "/auth/register", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, company_name: company }),
+          });
+          if (!r.ok) throw new Error((await r.json()).detail || "Could not create account.");
+        }
+        // login (form-encoded, OAuth2 style)
+        const body = new URLSearchParams({ username: email, password });
+        const r = await fetch(API + "/auth/login", {
+          method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body,
+        });
+        if (!r.ok) throw new Error((await r.json()).detail || "Incorrect email or password.");
+        const { access_token } = await r.json();
+        localStorage.setItem("access_token", access_token);
+        window.location.href = "/console";
+      } catch (ex) {
+        err.textContent = ex.message;
+        btn.disabled = false;
+        btn.textContent = currentMode === "register" ? "Create account" : "Sign in";
+      }
+    }
+  </script>
+</body>
+</html>
