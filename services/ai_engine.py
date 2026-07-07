@@ -624,6 +624,37 @@ def validate_extraction_result(raw: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
+def merge_required_skills(manual_skills, extracted_skills) -> list:
+    """
+    Union recruiter-entered required skills with any additional skills the AI
+    extracted from the free-text job description, deduplicated case- and
+    alias-insensitively (via scoring.normalize_skill).
+
+    This exists because every screening entry point previously did
+    `extracted_skills or manual_skills` — a boolean OR that let a partial
+    AI extraction silently *replace* the recruiter's deliberately-typed list
+    whenever the extraction returned anything at all. A recruiter who typed
+    "Python, React, PostgreSQL, AWS" could see PostgreSQL and AWS silently
+    dropped just because the JD text didn't happen to name them, even though
+    the recruiter explicitly required them. The recruiter's input is always
+    authoritative here; extraction only adds to it, never subtracts.
+    """
+    from scoring import normalize_skill  # local import: keep ai_engine standalone-importable
+
+    merged: list = []
+    seen: set = set()
+    for skill in list(manual_skills or []) + list(extracted_skills or []):
+        text = str(skill).strip()
+        if not text:
+            continue
+        key = normalize_skill(text)
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(text)
+    return merged
+
+
 def normalize_job_requirements(job_requirements: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """Normalize extracted job requirements to a strict, typed schema."""
     if not isinstance(job_requirements, dict):

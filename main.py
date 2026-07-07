@@ -12,6 +12,7 @@ from services.ai_engine import (
     extract_candidate_facts,
     extract_jd_requirements,
     normalize_job_requirements,
+    merge_required_skills,
     is_ai_available,
     get_ai_unavailable_reason,
     AIServiceUnavailableError,
@@ -235,7 +236,7 @@ async def bulk_screen_resumes(
         extracted_requirements = await extract_jd_requirements(job_description)
         normalized_requirements = normalize_job_requirements(extracted_requirements)
 
-        effective_skills = normalized_requirements["must_have_skills"] or skills_list
+        effective_skills = merge_required_skills(skills_list, normalized_requirements["must_have_skills"])
         extracted_min_exp = normalized_requirements["minimum_years_experience"]
         effective_min_experience = int(extracted_min_exp) if extracted_min_exp > 0 else normalized_min_experience
 

@@ -14,7 +14,7 @@ import models
 from core.celery_app import celery_app
 from database import SessionLocal
 from services.ai_engine import extract_candidate_facts, extract_jd_requirements
-from services.ai_engine import normalize_job_requirements
+from services.ai_engine import normalize_job_requirements, merge_required_skills
 from services.ai_engine import generate_candidate_summary_sync
 from services.ai_engine import get_skill_embeddings_sync
 from services.pdf_parser import extract_text_from_pdf
@@ -332,7 +332,7 @@ def process_resume(self, resume_b64: str, job_id: int, company_id: int):
             job_config: Dict[str, Any] = {
                 "title": job.title or "",
                 "min_experience": effective_min_exp,
-                "required_skills": normalized_requirements.get("must_have_skills") or job.required_skills or [],
+                "required_skills": merge_required_skills(job.required_skills, normalized_requirements.get("must_have_skills")),
                 "nice_to_have_skills": job.nice_to_have_skills or [],
                 # "Not specified" (not "bachelor") — never invent an education
                 # requirement the employer didn't set.
@@ -544,7 +544,7 @@ def process_public_resume(
             job_config: Dict[str, Any] = {
                 "title": job.title or "",
                 "min_experience": effective_min_exp,
-                "required_skills": normalized_requirements.get("must_have_skills") or job.required_skills or [],
+                "required_skills": merge_required_skills(job.required_skills, normalized_requirements.get("must_have_skills")),
                 "nice_to_have_skills": job.nice_to_have_skills or [],
                 "required_education": normalized_requirements.get("education_requirement") or "Not specified",
                 "department": job.department,

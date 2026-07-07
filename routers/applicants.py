@@ -6,6 +6,7 @@ from services.pdf_parser import extract_text_from_pdf
 from services.ai_engine import (
     extract_candidate_facts,
     normalize_job_requirements,
+    merge_required_skills,
     generate_candidate_summary_sync,
     get_skill_embeddings_sync,
 )
@@ -126,7 +127,7 @@ async def apply_for_job(
     job_config: dict[str, Any] = {
         "title": job.title or "",
         "min_experience": effective_min_exp,
-        "required_skills": normalized_requirements.get("must_have_skills") or job.required_skills or [],
+        "required_skills": merge_required_skills(job.required_skills, normalized_requirements.get("must_have_skills")),
         "nice_to_have_skills": job.nice_to_have_skills or [],
         "required_education": normalized_requirements.get("education_requirement") or "Not specified",
         "department": job.department,
@@ -290,7 +291,7 @@ async def reprocess_applicant_resume(
     job_config: dict[str, Any] = {
         "title": job.title or "",
         "min_experience": effective_min_exp,
-        "required_skills": normalized_requirements.get("must_have_skills") or job.required_skills or [],
+        "required_skills": merge_required_skills(job.required_skills, normalized_requirements.get("must_have_skills")),
         "nice_to_have_skills": job.nice_to_have_skills or [],
         "required_education": normalized_requirements.get("education_requirement") or "Not specified",
         "department": job.department,
