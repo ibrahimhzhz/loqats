@@ -121,6 +121,7 @@
     </main>
   </div>
 
+  <script src="/static/js/auth.js"></script>
   <script>
     let currentMode = "login";
     const API = ""; // same origin
@@ -153,20 +154,10 @@
         if (currentMode === "register") {
           const company = document.getElementById("company").value.trim();
           if (!company) throw new Error("Company name is required.");
-          const r = await fetch(API + "/auth/register", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password, company_name: company }),
-          });
-          if (!r.ok) throw new Error((await r.json()).detail || "Could not create account.");
+          await Auth.register(email, password, company);
+        } else {
+          await Auth.login(email, password);
         }
-        // login (form-encoded, OAuth2 style)
-        const body = new URLSearchParams({ username: email, password });
-        const r = await fetch(API + "/auth/login", {
-          method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body,
-        });
-        if (!r.ok) throw new Error((await r.json()).detail || "Incorrect email or password.");
-        const { access_token } = await r.json();
-        localStorage.setItem("access_token", access_token);
         window.location.href = "/console";
       } catch (ex) {
         err.textContent = ex.message;
